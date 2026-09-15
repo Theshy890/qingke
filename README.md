@@ -22,6 +22,27 @@
 
 > 这段"做减法"的经历本身也是项目的一部分：**合规评估 → 架构取舍 → 无侵入降级**，是我在这个项目中获得的超出技术栈本身的收获。
 
+## 🌟 项目亮点
+
+### 产品设计：一套应用，两种性格
+
+- **双主题视觉体系**：用户端与管理端共用一个 SPA，却各自拥有完整独立的视觉语言——
+  - **用户端 · 清新卡通风**：贴合"绿植养护"的温度感。薄荷绿主色、大圆角卡片、渐变色彩块，弹窗标题自带 🌿 叶片摇曳动画（`leaf-sway` keyframes），弱化"工具感"、强化"陪伴感"；
+  - **管理端 · 深色科技风**：`#0a1929` 深空底色 + 青绿荧光描边（`--admin-accent: #00bfa5`）、卡片内发光阴影、Orbitron 等宽数字字体渲染统计指标，突出数据密度的"驾驶舱"气质。
+  - 两套主题按路由前缀作用域隔离（`.admin-dark` 类名限定），互不污染，通过一个 `import` 即可整体换肤。
+- **深度定制而非套壳**：通过 SCSS `@forward` 重定义 Element Plus 色板，并在 `global.css` 中对按钮、输入框字数统计、分页、消息框、滚动条逐一做主题化覆写，组件库"隐形"、品牌感统一。
+- **细节体验**：管理端弹窗支持**四角 + 四边 8 向拖拽缩放**（高密度操作场景下自由布局）；首页功能入口以渐变色卡片区分语义；新手引导页降低首次使用门槛。
+
+### 功能设计：完整闭环的业务巧思
+
+- **一次调用，双重智能**：AI 识别与病害诊断合并为**单次多模态调用**（GLM-4.6V-Flash），一次拍照同时返回"这是什么植物 + 它得了什么病 + 怎么治"，节省一半 API 成本与用户等待。
+- **积分经济闭环**：每日签到赚积分 → AI 识别按次扣积分（10 分/次）→ **调用失败自动退积分**。扣减采用 SQL 原子操作（`points >= cost` 条件更新）防并发超扣，失败补偿保证"用户不为服务端故障买单"。
+- **多 Key 轮询池 + 失败降级**：智谱 API 配置多个 Key 轮转分摊免费额度，单 Key 限流/故障自动切换重试，最后兜底降级提示。
+- **UGC 全链路 + 审核工作流**：发帖 / 评论树（主评论 + 分页回复）/ 点赞 / 关注 / 访客足迹 / 私信，管理端配套**先审后发**机制（`auditStatus` 状态机），完整复刻内容平台治理形态。
+- **注解式操作审计**：自定义 `@OperationLogAnnotation` + AOP 切面，关键操作零侵入自动留痕（操作人、IP、模块、耗时），日志异步落库不阻塞主流程。
+- **异常可观测性**：全局异常处理器捕获所有未处理异常并**持久化到 `system_error` 表**（模块、类型、堆栈、请求 URL），管理端"错误中心"可视化查询与一键清空——把"报错"变成可运营的资产。
+- **自动化养护提醒**：Quartz 每小时扫描养护记录，按周期批量生成站内提醒，用户登录即在通知中心可见，形成"记录 → 提醒 → 回访"留存闭环。
+
 ## ✨ 核心功能
 
 ### 用户端
@@ -58,7 +79,7 @@
 
 - **Spring Boot 3.2**（Java 17）+ Spring Web + AOP
 - **MyBatis-Plus 3.5** + PageHelper 分页
-- **MySQL 8** + HikariCP
+- **MySQL 8** 
 - **JWT**（jjwt 0.11）鉴权：签发携带角色声明的 Token，管理端敏感接口由 `AdminAuthInterceptor` 按路径清单拦截校验
 - **Quartz** 定时任务（每小时从养护记录批量生成站内提醒）
 - OkHttp + 智谱 GLM-4.6V-Flash API（多模态识别与诊断，多 Key 轮询 + 失败降级）
@@ -135,10 +156,10 @@ mysql -u root -p qingke < db/qingke.sql
 
 ### 2. 配置密钥
 
-敏感配置不入库（见 `.gitignore`），有两种方式任选：
+敏感配置不入库，有两种方式任选：
 
 - **环境变量**：`MYSQL_PASSWORD`、`ZHIPU_API_KEY_1..5`、`JWT_SECRET`
-- **本地文件**：在 `Springboot/src/main/resources/` 下创建 `application-local.yml`（该文件已被 git 忽略），覆盖对应配置项
+- **本地文件**：在 `Springboot/src/main/resources/` 下创建 `application-local.yml`，覆盖对应配置项
 
 ### 3. 启动后端
 
@@ -165,6 +186,44 @@ npm run dev                # Vite 开发服务器，/api 自动代理到 8080
 
 > 有免费额度，注册创建应用后把 Key 填入第 2 步即可（支持配置多个 Key 轮询分摊限额）。
 
+## 📸 界面预览
+
+> 截图待补充：将对应图片放入 `docs/screenshots/` 目录（文件名如下）即可自动显示。
+
+| 登录/注册 | 首页 |
+|---|---|
+| ![登录/注册](docs/screenshots/login.png) | ![首页](docs/screenshots/home.png) |
+
+| 我的养护 | 养护知识 |
+|---|---|
+| ![我的养护](docs/screenshots/plant-care.png) | ![养护知识](docs/screenshots/knowledge.png) |
+
+| 社区 | AI 识别 |
+|---|---|
+| ![社区](docs/screenshots/community.png) | ![AI识别](docs/screenshots/recognize.png) |
+
+| 提醒 | AI 客服 |
+|---|---|
+| ![提醒](docs/screenshots/reminders.png) | ![AI客服](docs/screenshots/ai-chat.png) |
+
+### 管理端
+
+| 数据面板（首页） | 用户管理 |
+|---|---|
+| ![管理端首页](docs/screenshots/admin-dashboard.png) | ![用户管理](docs/screenshots/admin-users.png) |
+
+| 绿植种类管理 | 养护知识管理 |
+|---|---|
+| ![绿植种类](docs/screenshots/admin-category.png) | ![养护知识](docs/screenshots/admin-knowledge.png) |
+
+| 绿植识别记录 | 养护记录管理 |
+|---|---|
+| ![绿植识别](docs/screenshots/admin-recognize.png) | ![养护记录](docs/screenshots/admin-record.png) |
+
+| 社区互动审核 | 系统管理 |
+|---|---|
+| ![社区审核](docs/screenshots/admin-community.png) | ![系统管理](docs/screenshots/admin-system.png) |
+
 ## 📄 License
 
-本项目为个人学习与作品展示，代码可自由阅读参考。
+本项目仅为个人学习与作品展示用途，代码可自由阅读参考。
