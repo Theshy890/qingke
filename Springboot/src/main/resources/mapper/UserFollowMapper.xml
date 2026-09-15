@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qingke.mapper.UserFollowMapper">
+
+    <!-- 查询关注列表（包含被关注用户的详细信息） -->
+    <select id="getFollowingListWithUser" resultType="com.qingke.entity.UserFollowListItemDTO">
+        SELECT
+            uf.id,
+            u.id AS userId,
+            u.name,
+            u.zh,
+            u.avatar_url AS avatarUrl,
+            u.signature,
+            CASE WHEN EXISTS (
+                SELECT 1 FROM user_follow uf2
+                WHERE uf2.follower_id = #{currentUserId} AND uf2.following_id = u.id
+            ) THEN TRUE ELSE FALSE END AS isFollowing
+        FROM user_follow uf
+        INNER JOIN sys_user u ON uf.following_id = u.id
+        WHERE uf.follower_id = #{userId}
+        ORDER BY uf.create_time DESC
+    </select>
+
+    <!-- 查询粉丝列表（包含粉丝用户的详细信息） -->
+    <select id="getFollowersListWithUser" resultType="com.qingke.entity.UserFollowListItemDTO">
+        SELECT
+            uf.id,
+            u.id AS userId,
+            u.name,
+            u.zh,
+            u.avatar_url AS avatarUrl,
+            u.signature,
+            CASE WHEN EXISTS (
+                SELECT 1 FROM user_follow uf2
+                WHERE uf2.follower_id = #{currentUserId} AND uf2.following_id = u.id
+            ) THEN TRUE ELSE FALSE END AS isFollowing
+        FROM user_follow uf
+        INNER JOIN sys_user u ON uf.follower_id = u.id
+        WHERE uf.following_id = #{userId}
+        ORDER BY uf.create_time DESC
+    </select>
+
+</mapper>

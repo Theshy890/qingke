@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qingke.mapper.CommunityCommentMapper">
+    
+    <resultMap id="BaseResultMap" type="com.qingke.entity.CommunityComment">
+        <id column="id" property="id"/>
+        <result column="post_id" property="postId"/>
+        <result column="user_id" property="userId"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="nickname" property="nickname"/>
+        <result column="content" property="content"/>
+        <result column="reply" property="reply"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="dislike_count" property="dislikeCount"/>
+        <result column="is_top" property="isTop"/>
+        <result column="like_user_ids" property="likeUserIds"/>
+        <result column="dislike_user_ids" property="dislikeUserIds"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="reply_to_user_id" property="replyToUserId"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <resultMap id="CommentTreeResultMap" type="com.qingke.entity.CommentTreeDTO">
+        <id column="id" property="id"/>
+        <result column="post_id" property="postId"/>
+        <result column="user_id" property="userId"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="nickname" property="nickname"/>
+        <result column="content" property="content"/>
+        <result column="reply" property="reply"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="is_top" property="isTop"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="reply_to_user_id" property="replyToUserId"/>
+        <result column="reply_to_user_name" property="replyToUserName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="reply_count" property="replyCount"/>
+    </resultMap>
+
+    <resultMap id="CommentReplyResultMap" type="com.qingke.entity.CommentReplyDTO">
+        <id column="id" property="id"/>
+        <result column="post_id" property="postId"/>
+        <result column="user_id" property="userId"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="nickname" property="nickname"/>
+        <result column="content" property="content"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="reply_to_user_id" property="replyToUserId"/>
+        <result column="reply_to_user_name" property="replyToUserName"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    
+    <select id="findByPostId" resultMap="BaseResultMap">
+        SELECT * FROM community_comment WHERE post_id = #{postId} ORDER BY create_time ASC
+    </select>
+
+    <!-- 查询主评论列表（parentId为NULL），包含回复数量统计 -->
+    <select id="findMainCommentsByPostId" resultMap="CommentTreeResultMap">
+        SELECT
+            c.*,
+            (SELECT COUNT(*) FROM community_comment WHERE parent_id = c.id) AS reply_count
+        FROM community_comment c
+        WHERE c.post_id = #{postId} AND c.parent_id IS NULL
+        ORDER BY c.is_top DESC, c.create_time ASC
+    </select>
+
+    <!-- 查询某个主评论下的所有回复（子评论），包含回复目标用户名 -->
+    <select id="findRepliesByParentId" resultMap="CommentReplyResultMap">
+        SELECT
+            c.*,
+            u.name AS reply_to_user_name
+        FROM community_comment c
+        LEFT JOIN sys_user u ON c.reply_to_user_id = u.id
+        WHERE c.parent_id = #{parentId}
+        ORDER BY c.create_time ASC
+    </select>
+
+    <!-- 分页查询某个主评论下的回复 -->
+    <select id="findRepliesByParentIdWithPage" resultMap="CommentReplyResultMap">
+        SELECT
+            c.*,
+            u.name AS reply_to_user_name
+        FROM community_comment c
+        LEFT JOIN sys_user u ON c.reply_to_user_id = u.id
+        WHERE c.parent_id = #{parentId}
+        ORDER BY c.create_time ASC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT * FROM community_comment WHERE id = #{id}
+    </select>
+    
+    <delete id="deleteBatch">
+        DELETE FROM community_comment WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </delete>
+    
+    <delete id="deleteByPostId">
+        DELETE FROM community_comment WHERE post_id = #{postId}
+    </delete>
+    
+    <update id="increaseLikeCount">
+        UPDATE community_comment SET like_count = IFNULL(like_count, 0) + 1 WHERE id = #{id}
+    </update>
+    
+    <update id="increaseDislikeCount">
+        UPDATE community_comment SET dislike_count = IFNULL(dislike_count, 0) + 1 WHERE id = #{id}
+    </update>
+    
+    <update id="updateReply">
+        UPDATE community_comment SET reply = #{reply} WHERE id = #{id}
+    </update>
+    
+</mapper>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qingke.mapper.UserCollectMapper">
+    
+    <resultMap id="BaseResultMap" type="com.qingke.entity.UserCollect">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="target_id" property="targetId"/>
+        <result column="target_table" property="targetTable"/>
+        <result column="target_name" property="targetName"/>
+        <result column="img_url" property="imgUrl"/>
+        <result column="target_type" property="targetType"/>
+        <result column="rec_type" property="recType"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    
+    <select id="findByUseridAndSpid" resultMap="BaseResultMap">
+        SELECT * FROM user_collect 
+        WHERE user_id = #{userid} 
+        AND target_id = #{spid}
+        AND target_table = #{tablename}
+        LIMIT 1
+    </select>
+    
+    <select id="findByUserid" resultMap="BaseResultMap">
+        SELECT * FROM user_collect 
+        WHERE user_id = #{userid}
+        ORDER BY create_time DESC
+    </select>
+    
+    <select id="findByUseridAndTablename" resultMap="BaseResultMap">
+        SELECT * FROM user_collect 
+        WHERE user_id = #{userid}
+        AND target_table = #{tablename}
+        ORDER BY create_time DESC
+    </select>
+    
+    <delete id="deleteByUseridAndSpid">
+        DELETE FROM user_collect 
+        WHERE user_id = #{userid} 
+        AND target_id = #{spid}
+        AND target_table = #{tablename}
+    </delete>
+    
+</mapper>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qingke.mapper.PlantRecognizeMapper">
+    
+    <resultMap id="BaseResultMap" type="com.qingke.entity.PlantRecognize">
+        <id column="id" property="id"/>
+        <result column="plant_name" property="plantName"/>
+        <result column="img_url" property="imgUrl"/>
+        <result column="detail_link" property="detailLink"/>
+        <result column="plant_intro" property="plantIntro"/>
+        <result column="disease_name" property="diseaseName"/>
+        <result column="disease_desc" property="diseaseDesc"/>
+        <result column="treat_suggest" property="treatSuggest"/>
+        <result column="user_id" property="userId"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT * FROM plant_recognize ORDER BY create_time DESC
+    </select>
+    
+    <select id="findByUserid" resultMap="BaseResultMap">
+        SELECT * FROM plant_recognize 
+        WHERE user_id = #{userid}
+        ORDER BY create_time DESC
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT * FROM plant_recognize WHERE id = #{id}
+    </select>
+    
+    <delete id="deleteBatch">
+        DELETE FROM plant_recognize WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

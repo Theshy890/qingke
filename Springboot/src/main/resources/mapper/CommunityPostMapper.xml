@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qingke.mapper.CommunityPostMapper">
+    
+    <resultMap id="BaseResultMap" type="com.qingke.entity.CommunityPost">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="img_url" property="imgUrl"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_account" property="userAccount"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="content" property="content"/>
+        <result column="publish_time" property="publishTime"/>
+        <result column="audit_status" property="auditStatus"/>
+        <result column="audit_reply" property="auditReply"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="dislike_count" property="dislikeCount"/>
+        <result column="comment_count" property="commentCount"/>
+        <result column="collect_count" property="collectCount"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT * FROM community_post ORDER BY create_time DESC
+    </select>
+    
+    <select id="findByCondition" resultMap="BaseResultMap">
+        SELECT * FROM community_post
+        <where>
+            <if test="title != null and title != ''">AND title LIKE CONCAT('%', #{title}, '%')</if>
+            <if test="userAccount != null and userAccount != ''">AND user_account LIKE CONCAT('%', #{userAccount}, '%')</if>
+            <if test="auditStatus != null">AND audit_status = #{auditStatus}</if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+    
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT * FROM community_post WHERE id = #{id}
+    </select>
+    
+    <select id="findByUserId" resultMap="BaseResultMap">
+        SELECT * FROM community_post WHERE user_id = #{userId} AND audit_status = 1 ORDER BY create_time DESC
+    </select>
+    
+    <delete id="deleteBatch">
+        DELETE FROM community_post WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </delete>
+    
+    <update id="increaseLikeCount">
+        UPDATE community_post SET like_count = IFNULL(like_count, 0) + 1 WHERE id = #{id}
+    </update>
+    
+    <update id="decreaseLikeCount">
+        UPDATE community_post SET like_count = IFNULL(like_count, 0) - 1 WHERE id = #{id} AND like_count > 0
+    </update>
+    
+    <update id="increaseDislikeCount">
+        UPDATE community_post SET dislike_count = IFNULL(dislike_count, 0) + 1 WHERE id = #{id}
+    </update>
+    
+    <update id="increaseCommentCount">
+        UPDATE community_post SET comment_count = IFNULL(comment_count, 0) + 1 WHERE id = #{id}
+    </update>
+    
+    <update id="decreaseCommentCount">
+        UPDATE community_post SET comment_count = IFNULL(comment_count, 0) - 1 WHERE id = #{id} AND comment_count > 0
+    </update>
+    
+    <update id="updateAuditStatus">
+        UPDATE community_post SET audit_status = #{auditStatus}, audit_reply = #{auditReply} WHERE id = #{id}
+    </update>
+    
+    <update id="increaseCollectCount">
+        UPDATE community_post SET collect_count = IFNULL(collect_count, 0) + 1 WHERE id = #{id}
+    </update>
+    
+    <update id="decreaseCollectCount">
+        UPDATE community_post SET collect_count = IFNULL(collect_count, 0) - 1 WHERE id = #{id} AND collect_count > 0
+    </update>
+    
+</mapper>

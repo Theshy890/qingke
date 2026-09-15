@@ -1,0 +1,322 @@
+/* 卡通风格弹窗样式 */
+
+/* 移除 el-dialog 的默认 padding，让标题栏和内容区域直接贴边 */
+.user-cartoon-dialog.el-dialog {
+  border-radius: 20px !important;
+  background: #f1f8f4 !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.15) !important;
+  border: none !important;
+  padding: 0 !important;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 90vh !important;
+}
+
+/* 让内部容器完全透明，看起来像不存在 */
+.user-cartoon-dialog.el-dialog .el-dialog__header {
+  background: transparent !important;
+  border: none !important;
+  padding: 20px 30px !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.user-cartoon-dialog.el-dialog .el-dialog__body {
+  background: transparent !important;
+  border: none !important;
+  padding: 30px !important;
+  margin: 0 !important;
+  overflow-y: auto !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+}
+
+.user-cartoon-dialog.el-dialog .el-dialog__footer {
+  background: transparent !important;
+  border: none !important;
+  padding: 20px 30px !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.user-cartoon-dialog.el-dialog .el-dialog__title {
+  color: #2e7d32;
+  font-weight: 600;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 标题前的叶子图标 */
+.user-cartoon-dialog.el-dialog .el-dialog__title::before {
+  content: '🌿';
+  font-size: 20px;
+  animation: leaf-sway 3s ease-in-out infinite;
+}
+
+@keyframes leaf-sway {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+.user-cartoon-dialog.el-dialog .el-dialog__headerbtn {
+  top: 20px;
+  right: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: white;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-cartoon-dialog.el-dialog .el-dialog__headerbtn .el-dialog__close {
+  position: static;
+  transform: none;
+}
+
+.user-cartoon-dialog.el-dialog .el-dialog__headerbtn:hover {
+  background: #4caf50;
+  transform: rotate(90deg);
+}
+
+.user-cartoon-dialog.el-dialog .el-dialog__headerbtn:hover .el-dialog__close {
+  color: white;
+}
+
+/* 移除伪元素装饰，改用 background-image */
+
+/* 左上角藤蔓叶子装饰 */
+.cartoon-decoration-topleft {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  width: 60px;
+  height: 60px;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.4;
+}
+
+/* 右下角花盆装饰 */
+.cartoon-decoration-bottomright {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  width: 80px;
+  height: 80px;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.35;
+}
+
+/* 按钮卡通风格 */
+.user-cartoon-dialog .el-button {
+  border-radius: 20px;
+  padding: 10px 24px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.user-cartoon-dialog .el-button--primary {
+  background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.user-cartoon-dialog .el-button--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+.user-cartoon-dialog .el-button--default {
+  background: white;
+  border: 2px solid #4caf50;
+  color: #4caf50;
+}
+
+.user-cartoon-dialog .el-button--default:hover {
+  background: #e8f5e9;
+  transform: translateY(-2px);
+}
+
+.user-cartoon-dialog .el-button--warning {
+  background: linear-gradient(135deg, #ffb74d 0%, #ff9800 100%);
+  border: none;
+  color: white;
+}
+
+.user-cartoon-dialog .el-button--danger {
+  background: white;
+  border: 2px solid #f44336;
+  color: #f44336;
+}
+
+/* 内容区域美化 */
+.user-cartoon-dialog .el-divider {
+  border-color: #c8e6c9;
+  border-style: dashed;
+  margin: 20px 0;
+}
+
+/* 表单样式 */
+.user-cartoon-dialog .el-input__wrapper,
+.user-cartoon-dialog .el-textarea__inner,
+.user-cartoon-dialog .el-select .el-input__wrapper {
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.user-cartoon-dialog .el-input__wrapper:hover,
+.user-cartoon-dialog .el-textarea__inner:hover {
+  box-shadow: 0 2px 12px rgba(76, 175, 80, 0.15);
+}
+
+.user-cartoon-dialog .el-input__wrapper.is-focus,
+.user-cartoon-dialog .el-textarea__inner:focus {
+  box-shadow: 0 2px 12px rgba(76, 175, 80, 0.25);
+}
+
+/* 标签卡通风格 */
+.user-cartoon-dialog .el-tag {
+  border-radius: 12px;
+  padding: 4px 12px;
+  border: none;
+}
+
+.user-cartoon-dialog .el-tag--success {
+  background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+  color: white;
+}
+
+.user-cartoon-dialog .el-tag--warning {
+  background: linear-gradient(135deg, #ffb74d 0%, #ff9800 100%);
+  color: white;
+}
+
+/* 图片容器圆角 */
+.user-cartoon-dialog .el-image {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* 描述列表美化 */
+.user-cartoon-dialog .el-descriptions {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.user-cartoon-dialog .el-descriptions__label {
+  background: #f1f8f4 !important;
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+/* 评论区卡通风格 */
+.user-cartoon-dialog .comment-item {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.user-cartoon-dialog .comment-item:hover {
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+  transform: translateX(4px);
+}
+
+/* AI 免责声明卡通风格 */
+.user-cartoon-dialog .ai-disclaimer {
+  border-radius: 12px;
+  border-left: 4px solid #ff9800;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.user-cartoon-dialog .ai-disclaimer::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, rgba(255, 152, 0, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+/* 上传组件卡通风格 */
+.user-cartoon-dialog .community-img-uploader .community-img-placeholder {
+  border-radius: 12px;
+  border: 2px dashed #4caf50;
+  background: #f1f8f4;
+  transition: all 0.3s ease;
+}
+
+.user-cartoon-dialog .community-img-uploader:hover .community-img-placeholder {
+  border-color: #66bb6a;
+  background: #e8f5e9;
+  transform: scale(1.05);
+}
+
+/* 卡片样式 */
+.user-cartoon-dialog .detail-header,
+.user-cartoon-dialog .detail-content,
+.user-cartoon-dialog .detail-actions {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* 统计信息美化 */
+.user-cartoon-dialog .stat-item {
+  background: #e8f5e9;
+  padding: 6px 12px;
+  border-radius: 20px;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+/* 日期选择器圆角 */
+.user-cartoon-dialog .el-date-editor {
+  border-radius: 12px;
+}
+
+/* 动画效果 */
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-cartoon-dialog .el-dialog {
+  animation: float-up 0.4s ease-out;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .user-cartoon-dialog .el-dialog {
+    border-radius: 16px;
+  }
+
+  .user-cartoon-dialog .el-dialog::before,
+  .user-cartoon-dialog .el-dialog::after {
+    width: 60px;
+    height: 60px;
+  }
+}

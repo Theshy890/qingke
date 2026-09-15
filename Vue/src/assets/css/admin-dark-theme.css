@@ -1,0 +1,677 @@
+/* =====================================================
+   管理端全局深色科技主题
+   引入方式：在 Home.vue 中 import 即可，所有管理端页面自动继承
+   ===================================================== */
+
+/* ---------- CSS 变量 ---------- */
+:root {
+  --admin-bg: #0a1929;
+  --admin-bg-light: #0d2436;
+  --admin-panel: rgba(10, 25, 41, 0.85);
+  --admin-panel-solid: #0a1929;
+  --admin-border: rgba(0, 191, 165, 0.2);
+  --admin-border-glow: rgba(0, 191, 165, 0.4);
+  --admin-accent: #00bfa5;
+  --admin-accent-light: #00d4b8;
+  --admin-data: #00bfa5;
+  --admin-data-glow: rgba(0, 191, 165, 0.5);
+  --admin-text: #e0e6ed;
+  --admin-text-secondary: #7b9a8f;
+  --admin-success: #00e676;
+  --admin-danger: #ff5252;
+  --admin-warning: #ffab00;
+  --admin-font-number: 'Orbitron', 'Consolas', monospace;
+}
+
+/* ---------- 页面容器 ---------- */
+.admin-dark .main-content {
+  background: var(--admin-bg) !important;
+  color: var(--admin-text);
+}
+
+/* ---------- el-card 深色面板 ---------- */
+.admin-dark .el-card {
+  background: var(--admin-panel) !important;
+  border: 1px solid var(--admin-border) !important;
+  border-radius: 8px;
+  color: var(--admin-text) !important;
+  box-shadow: 0 0 15px rgba(0, 191, 165, 0.05), inset 0 0 30px rgba(0, 191, 165, 0.02);
+}
+
+.admin-dark .el-card__header {
+  border-bottom: 1px solid var(--admin-border) !important;
+  color: var(--admin-text);
+  padding: 12px 20px;
+}
+
+.admin-dark .el-card__body {
+  color: var(--admin-text);
+}
+
+/* ---------- el-checkbox 深色复选框 ---------- */
+.admin-dark .el-checkbox__input.is-checked .el-checkbox__inner {
+  background-color: #00bfa5 !important;
+  border-color: #00bfa5 !important;
+}
+
+.admin-dark .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+  background-color: #00bfa5 !important;
+  border-color: #00bfa5 !important;
+}
+
+.admin-dark .el-checkbox__inner:hover {
+  border-color: #00bfa5 !important;
+}
+
+.admin-dark .el-checkbox__input.is-checked + .el-checkbox__label {
+  color: #ffffff !important;
+}
+
+/* ---------- el-table 深色表格 ---------- */
+.admin-dark .el-table {
+  --el-table-bg-color: transparent !important;
+  --el-table-tr-bg-color: transparent !important;
+  --el-table-header-bg-color: rgba(0, 191, 165, 0.08) !important;
+  --el-table-row-hover-bg-color: rgba(0, 191, 165, 0.05) !important;
+  --el-table-border-color: var(--admin-border) !important;
+  --el-table-text-color: var(--admin-text) !important;
+  --el-table-header-text-color: var(--admin-data) !important;
+  --el-fill-color-lighter: rgba(0, 191, 165, 0.03) !important;
+}
+
+.admin-dark .el-table th.el-table__cell {
+  background: rgba(0, 191, 165, 0.08) !important;
+  color: var(--admin-data) !important;
+  font-weight: 600;
+}
+
+/* 选中行 / 当前行 深色背景 */
+.admin-dark .el-table__body tr.current-row > td,
+.admin-dark .el-table__body tr.selected-row > td {
+  background-color: rgba(0, 191, 165, 0.12) !important;
+  color: var(--admin-text) !important;
+}
+
+/* 表格单元格文字颜色强制深色 */
+.admin-dark .el-table__body td {
+  color: var(--admin-text) !important;
+}
+
+/* ---------- el-button 深色按钮（透明背景） ---------- */
+.admin-dark .el-button--primary {
+  --el-button-bg-color: transparent !important;
+  --el-button-border-color: var(--admin-data) !important;
+  --el-button-text-color: var(--admin-data) !important;
+  --el-button-hover-bg-color: rgba(0, 191, 165, 0.15) !important;
+  --el-button-hover-border-color: var(--admin-data) !important;
+  --el-button-hover-text-color: var(--admin-data) !important;
+}
+
+.admin-dark .el-button--success {
+  --el-button-bg-color: transparent !important;
+  --el-button-border-color: var(--admin-data) !important;
+  --el-button-text-color: var(--admin-data) !important;
+  --el-button-hover-bg-color: rgba(0, 191, 165, 0.15) !important;
+  --el-button-hover-border-color: var(--admin-data) !important;
+  --el-button-hover-text-color: var(--admin-data) !important;
+}
+
+.admin-dark .el-button--danger {
+  --el-button-bg-color: transparent !important;
+  --el-button-border-color: var(--admin-danger) !important;
+  --el-button-text-color: var(--admin-danger) !important;
+  --el-button-hover-bg-color: rgba(255, 82, 82, 0.15) !important;
+  --el-button-hover-border-color: var(--admin-danger) !important;
+  --el-button-hover-text-color: var(--admin-danger) !important;
+}
+
+.admin-dark .el-button--warning {
+  --el-button-bg-color: transparent !important;
+  --el-button-border-color: var(--admin-warning) !important;
+  --el-button-text-color: var(--admin-warning) !important;
+  --el-button-hover-bg-color: rgba(255, 171, 0, 0.15) !important;
+  --el-button-hover-border-color: var(--admin-warning) !important;
+  --el-button-hover-text-color: var(--admin-warning) !important;
+}
+
+.admin-dark .el-button--info {
+  --el-button-bg-color: transparent !important;
+  --el-button-border-color: var(--admin-text-secondary) !important;
+  --el-button-text-color: var(--admin-text-secondary) !important;
+  --el-button-hover-bg-color: rgba(123, 154, 143, 0.15) !important;
+  --el-button-hover-border-color: var(--admin-text) !important;
+  --el-button-hover-text-color: var(--admin-text) !important;
+}
+
+.admin-dark .el-button--default {
+  --el-button-bg-color: transparent !important;
+  --el-button-border-color: var(--admin-border) !important;
+  --el-button-text-color: var(--admin-text) !important;
+  --el-button-hover-bg-color: rgba(0, 191, 165, 0.1) !important;
+  --el-button-hover-border-color: var(--admin-border-glow) !important;
+  --el-button-hover-text-color: var(--admin-data) !important;
+}
+
+.admin-dark .el-button.is-plain {
+  --el-button-bg-color: transparent !important;
+}
+
+/* ---------- el-input 深色输入框 ---------- */
+.admin-dark .el-input__wrapper {
+  background: rgba(0, 20, 50, 0.6) !important;
+  box-shadow: 0 0 0 1px var(--admin-border) inset !important;
+  color: var(--admin-text) !important;
+}
+
+.admin-dark .el-input__inner {
+  color: var(--admin-text) !important;
+}
+
+.admin-dark .el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--admin-border-glow) inset !important;
+}
+
+.admin-dark .el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--admin-data) inset !important;
+}
+
+/* ---------- el-select 深色下拉框 ---------- */
+/* 兼容 Element Plus 2.11+ 新结构 .el-select__wrapper 与旧结构 .el-input__wrapper */
+.admin-dark .el-select__wrapper,
+.admin-dark .el-select .el-input__wrapper {
+  background: rgba(0, 20, 50, 0.6) !important;
+  box-shadow: 0 0 0 1px var(--admin-border) inset !important;
+  color: var(--admin-text) !important;
+}
+
+.admin-dark .el-select__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--admin-border-glow) inset !important;
+}
+
+.admin-dark .el-select__wrapper.is-focused {
+  box-shadow: 0 0 0 1px var(--admin-data) inset !important;
+}
+
+.admin-dark .el-select__placeholder,
+.admin-dark .el-select__selected-item {
+  color: var(--admin-text) !important;
+}
+
+.admin-dark .el-select-dropdown {
+  background: var(--admin-panel-solid) !important;
+  border: 1px solid var(--admin-border) !important;
+}
+
+.admin-dark .el-select-dropdown__item {
+  color: var(--admin-text) !important;
+}
+
+.admin-dark .el-select-dropdown__item:hover,
+.admin-dark .el-select-dropdown__item.is-hovering {
+  background: rgba(0, 191, 165, 0.08) !important;
+}
+
+.admin-dark .el-select-dropdown__item.is-selected {
+  color: var(--admin-data) !important;
+}
+
+/* ---------- el-textarea ---------- */
+.admin-dark .el-textarea__inner {
+  background: rgba(0, 20, 50, 0.6) !important;
+  box-shadow: 0 0 0 1px var(--admin-border) inset !important;
+  color: var(--admin-text) !important;
+}
+
+/* ---------- el-dialog 深色弹窗 ---------- */
+.admin-dark .el-dialog {
+  background: var(--admin-panel-solid) !important;
+  border: 1px solid var(--admin-border) !important;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+.admin-dark .el-dialog__header {
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-dark .el-dialog__title {
+  color: var(--admin-data) !important;
+  font-weight: 600;
+}
+
+.admin-dark .el-dialog__body {
+  color: var(--admin-text) !important;
+}
+
+.admin-dark .el-dialog__headerbtn .el-dialog__close {
+  color: var(--admin-text-secondary) !important;
+}
+
+/* ---------- el-form ---------- */
+.admin-dark .el-form-item__label {
+  color: var(--admin-text-secondary) !important;
+}
+
+/* ---------- el-tag 深色标签 ---------- */
+.admin-dark .el-tag {
+  border: none !important;
+}
+
+.admin-dark .el-tag--success {
+  background: rgba(0, 230, 118, 0.15) !important;
+  color: var(--admin-success) !important;
+}
+
+.admin-dark .el-tag--danger {
+  background: rgba(255, 82, 82, 0.15) !important;
+  color: var(--admin-danger) !important;
+}
+
+.admin-dark .el-tag--warning {
+  background: rgba(255, 171, 0, 0.15) !important;
+  color: var(--admin-warning) !important;
+}
+
+.admin-dark .el-tag--info {
+  background: rgba(0, 191, 165, 0.1) !important;
+  color: var(--admin-data) !important;
+}
+
+.admin-dark .el-tag--primary,
+.admin-dark .el-tag:not([class*="--"]) {
+  background: rgba(0, 191, 165, 0.15) !important;
+  color: var(--admin-data) !important;
+}
+
+/* ---------- el-pagination ---------- */
+.admin-dark .el-pagination {
+  --el-pagination-bg-color: transparent !important;
+  --el-pagination-text-color: var(--admin-text-secondary) !important;
+  --el-pagination-button-bg-color: transparent !important;
+  --el-pagination-hover-color: var(--admin-data) !important;
+}
+
+.admin-dark .el-pager li {
+  background: transparent !important;
+  color: var(--admin-text-secondary) !important;
+  border: 1px solid var(--admin-border) !important;
+}
+
+.admin-dark .el-pager li.is-active {
+  background: transparent !important;
+  color: var(--admin-data) !important;
+  border-color: var(--admin-data) !important;
+}
+
+/* ---------- el-breadcrumb ---------- */
+.admin-dark .breadcrumb {
+  background: transparent !important;
+  border: 1px solid var(--admin-border) !important;
+}
+
+.admin-dark .el-breadcrumb__inner,
+.admin-dark .el-breadcrumb__separator {
+  color: var(--admin-text-secondary) !important;
+}
+
+/* ---------- 查询按钮透明 ---------- */
+.admin-dark .search-btn {
+  background: transparent !important;
+  border: 1px solid var(--admin-data) !important;
+  color: var(--admin-data) !important;
+}
+
+.admin-dark .search-btn:hover {
+  background: rgba(0, 191, 165, 0.15) !important;
+}
+
+/* ---------- el-message-box ---------- */
+.admin-dark .el-message-box {
+  background: var(--admin-panel-solid) !important;
+  border: 1px solid var(--admin-border) !important;
+}
+
+.admin-dark .el-message-box__title {
+  color: var(--admin-text) !important;
+}
+
+.admin-dark .el-message-box__content {
+  color: var(--admin-text-secondary) !important;
+}
+
+/* ---------- el-radio ---------- */
+.admin-dark .el-radio__label {
+  color: var(--admin-text) !important;
+}
+
+/* ---------- el-timeline ---------- */
+.admin-dark .el-timeline-item__wrapper {
+  color: var(--admin-text);
+}
+
+.admin-dark .el-timeline-item__timestamp {
+  color: var(--admin-text-secondary) !important;
+}
+
+/* ---------- el-statistic ---------- */
+.admin-dark .el-statistic__head {
+  color: var(--admin-text-secondary) !important;
+}
+
+.admin-dark .el-statistic__content {
+  color: var(--admin-data) !important;
+}
+
+/* ---------- el-empty ---------- */
+.admin-dark .el-empty__description p {
+  color: var(--admin-text-secondary) !important;
+}
+
+/* ---------- el-collapse ---------- */
+.admin-dark .el-collapse-item__header {
+  background: transparent !important;
+  color: var(--admin-text) !important;
+  border-bottom-color: var(--admin-border) !important;
+}
+
+.admin-dark .el-collapse-item__wrap {
+  background: transparent !important;
+  border-bottom-color: var(--admin-border) !important;
+}
+
+.admin-dark .el-collapse-item__content {
+  color: var(--admin-text-secondary) !important;
+}
+
+/* ---------- el-loading ---------- */
+.admin-dark .el-loading-mask {
+  background: rgba(11, 25, 41, 0.7) !important;
+}
+
+/* ---------- 滚动条深色 ---------- */
+.admin-dark ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.admin-dark ::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.admin-dark ::-webkit-scrollbar-thumb {
+  background: rgba(0, 191, 165, 0.2);
+  border-radius: 3px;
+}
+
+.admin-dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 191, 165, 0.4);
+}
+
+/* ---------- el-descriptions ---------- */
+.admin-dark .el-descriptions__label {
+  color: var(--admin-text-secondary) !important;
+}
+
+.admin-dark .el-descriptions__content {
+  color: var(--admin-text) !important;
+}
+
+.admin-dark .el-descriptions__body {
+  background: transparent !important;
+}
+
+/* ---------- el-dropdown ---------- */
+.admin-dark .el-dropdown-menu {
+  background: var(--admin-panel-solid) !important;
+  border: 1px solid var(--admin-border) !important;
+}
+
+.admin-dark .el-dropdown-menu__item {
+  color: var(--admin-text) !important;
+  background: transparent !important;
+  border-bottom: 1px solid var(--admin-border) !important;
+}
+
+.admin-dark .el-dropdown-menu__item:last-child {
+  border-bottom: none !important;
+}
+
+.admin-dark .el-dropdown-menu__item:hover {
+  background: transparent !important;
+  color: var(--admin-data) !important;
+  border-color: var(--admin-data) !important;
+  box-shadow: inset 0 0 0 1px var(--admin-data) !important;
+}
+
+/* ---------- el-divider 分隔线 ---------- */
+.admin-dark .el-divider {
+  border-top-color: var(--admin-border) !important;
+}
+
+.admin-dark .el-divider__text {
+  background: var(--admin-panel-solid) !important;
+  color: var(--admin-data) !important;
+}
+
+/* ---------- el-descriptions 描述列表 ---------- */
+.admin-dark .el-descriptions__label {
+  background: rgba(0, 191, 165, 0.06) !important;
+  color: var(--admin-text-secondary) !important;
+}
+
+.admin-dark .el-descriptions__content {
+  color: var(--admin-text) !important;
+}
+
+.admin-dark .el-descriptions__body {
+  background: transparent !important;
+}
+
+/* ---------- 通用类名深色覆盖（修复各管理页面的白底问题） ---------- */
+.admin-dark .table-card {
+  background: transparent !important;
+}
+
+.admin-dark .detail-text {
+  background: rgba(0, 191, 165, 0.06) !important;
+  color: var(--admin-text) !important;
+}
+
+.admin-dark .image-placeholder {
+  background: rgba(0, 191, 165, 0.04) !important;
+  color: var(--admin-text-secondary) !important;
+}
+
+.admin-dark .pagination {
+  background: transparent !important;
+}
+
+.admin-dark .audit-reply {
+  background: rgba(255, 106, 0, 0.08) !important;
+  border-left-color: var(--admin-accent) !important;
+  color: var(--admin-text) !important;
+}
+
+.admin-dark .stat-value {
+  color: var(--admin-text) !important;
+}
+
+.admin-dark .stat-label {
+  color: var(--admin-text-secondary) !important;
+}
+
+/* =====================================================
+   以下为 Teleport 到 body 的全局组件深色覆盖
+   （CSS 仅在管理端 Home.vue 中引入，离开管理端自动卸载）
+   ===================================================== */
+
+/* ---------- 全局 select 下拉框 ---------- */
+.el-select-dropdown {
+  background: #0a1929 !important;
+  border: 1px solid rgba(0, 191, 165, 0.2) !important;
+}
+
+.el-select-dropdown__item {
+  color: #e0e6ed !important;
+}
+
+.el-select-dropdown__item:hover,
+.el-select-dropdown__item.is-hovering {
+  background: rgba(0, 191, 165, 0.08) !important;
+}
+
+.el-select-dropdown__item.is-selected {
+  color: #00bfa5 !important;
+}
+
+.el-select-dropdown__empty {
+  color: #7b9a8f !important;
+}
+
+/* ---------- 全局 popper 弹出层 ---------- */
+.el-popper.is-light {
+  background: #0a1929 !important;
+  border: 1px solid rgba(0, 191, 165, 0.2) !important;
+  color: #e0e6ed !important;
+}
+
+.el-popper.is-light .el-popper__arrow::before {
+  background: #0a1929 !important;
+  border-color: rgba(0, 191, 165, 0.2) !important;
+}
+
+/* ---------- 全局 pagination 分页器下拉 ---------- */
+/* 兼容 Element Plus 2.11+ 新结构 .el-select__wrapper 与旧结构 .el-input__wrapper */
+.el-pagination .el-select__wrapper,
+.el-pagination .el-select .el-input__wrapper {
+  background: rgba(0, 20, 50, 0.6) !important;
+  box-shadow: 0 0 0 1px rgba(0, 191, 165, 0.2) inset !important;
+}
+
+.el-pagination .el-select__placeholder,
+.el-pagination .el-select__selected-item,
+.el-pagination .el-select .el-input__inner {
+  color: #e0e6ed !important;
+}
+
+/* ---------- 全局 descriptions 描述列表 ---------- */
+.el-descriptions {
+  --el-descriptions-item-bordered-label-background: rgba(0, 191, 165, 0.06) !important;
+}
+
+.el-descriptions__body {
+  background: transparent !important;
+  color: #e0e6ed !important;
+}
+
+.el-descriptions__label {
+  color: #7b9a8f !important;
+  background: rgba(0, 191, 165, 0.06) !important;
+}
+
+.el-descriptions__content {
+  color: #e0e6ed !important;
+}
+
+/* ---------- 全局 dialog 弹窗 ---------- */
+.el-dialog {
+  background: #0a1929 !important;
+  border: 1px solid rgba(0, 191, 165, 0.2) !important;
+}
+
+.el-dialog__title {
+  color: #00bfa5 !important;
+}
+
+.el-dialog__body {
+  color: #e0e6ed !important;
+}
+
+.el-dialog__header {
+  border-bottom: 1px solid rgba(0, 191, 165, 0.2);
+}
+
+.el-dialog__headerbtn .el-dialog__close {
+  color: #7b9a8f !important;
+}
+
+.el-dialog__headerbtn:hover .el-dialog__close {
+  color: #00bfa5 !important;
+}
+
+/* ---------- 全局 message-box 确认框 ---------- */
+.el-message-box {
+  background: #0a1929 !important;
+  border: 1px solid rgba(0, 191, 165, 0.2) !important;
+}
+
+.el-message-box__title {
+  color: #e0e6ed !important;
+}
+
+.el-message-box__content {
+  color: #7b9a8f !important;
+}
+
+.el-message-box__headerbtn .el-message-box__close {
+  color: #7b9a8f !important;
+}
+
+/* ---------- 全局 overlay 遮罩 ---------- */
+.el-overlay {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+
+/* ---------- 全局 input-number 数字输入 ---------- */
+.el-input-number__decrease,
+.el-input-number__increase {
+  background: rgba(0, 191, 165, 0.08) !important;
+  border-color: rgba(0, 191, 165, 0.2) !important;
+  color: #e0e6ed !important;
+}
+
+/* ---------- 全局 tag 标签默认白底修复 ---------- */
+.el-tag.is-plain {
+  background: transparent !important;
+}
+
+/* ---------- 全局 table 表格 ---------- */
+.el-table {
+  --el-table-bg-color: transparent !important;
+  --el-table-tr-bg-color: transparent !important;
+  --el-table-header-bg-color: rgba(0, 191, 165, 0.08) !important;
+  --el-table-row-hover-bg-color: rgba(0, 191, 165, 0.05) !important;
+  --el-table-border-color: rgba(0, 191, 165, 0.2) !important;
+  --el-table-text-color: #e0e6ed !important;
+  --el-table-header-text-color: #00bfa5 !important;
+  --el-fill-color-lighter: rgba(0, 191, 165, 0.03) !important;
+}
+
+.el-table th.el-table__cell {
+  background: rgba(0, 191, 165, 0.08) !important;
+  color: #00bfa5 !important;
+}
+
+/* ---------- 全局 collapse 折叠面板 ---------- */
+.el-collapse-item__header {
+  background: transparent !important;
+  color: #e0e6ed !important;
+  border-bottom-color: rgba(0, 191, 165, 0.2) !important;
+}
+
+.el-collapse-item__wrap {
+  background: transparent !important;
+  border-bottom-color: rgba(0, 191, 165, 0.2) !important;
+}
+
+.el-collapse-item__content {
+  color: #7b9a8f !important;
+}
+
+.el-collapse {
+  border-color: rgba(0, 191, 165, 0.2) !important;
+}
+
+/* ---------- 全局 empty 空状态 ---------- */
+.el-empty__description p {
+  color: #7b9a8f !important;
+}

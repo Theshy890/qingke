@@ -1,0 +1,56 @@
+server:
+  port: 8080
+  tomcat:
+    max-http-form-post-size: 20MB
+
+spring:
+  # 加载本地真实密钥配置（application-local.yml，已被 .gitignore 排除；文件不存在时自动跳过）
+  profiles:
+    include: local
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/qingke?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=true
+    # 敏感信息通过环境变量注入，默认值仅为本地开发占位，请替换为自己的配置
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:your_mysql_password}
+  # Quartz 调度器（业务主力：生成提醒等核心任务）
+  quartz:
+    job-store-type: memory
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: QingkeQuartzScheduler
+            instanceId: AUTO
+          threadPool:
+            threadCount: 5
+            threadNamePrefix: quartz-worker-
+
+mybatis-plus:
+  type-aliases-package: com.qingke.entity
+  mapper-locations: classpath*:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto
+
+# 智谱 AI 配置（GLM-4.6V-Flash 识别与病害分析，支持多Key轮询）
+zhipu:
+  ai:
+    api-keys:
+      - ${ZHIPU_API_KEY_1:your_zhipu_api_key_1}
+      - ${ZHIPU_API_KEY_2:your_zhipu_api_key_2}
+      - ${ZHIPU_API_KEY_3:your_zhipu_api_key_3}
+      - ${ZHIPU_API_KEY_4:your_zhipu_api_key_4}
+      - ${ZHIPU_API_KEY_5:your_zhipu_api_key_5}
+    model: glm-4.6v-flash
+    api-url: https://open.bigmodel.cn/api/paas/v4/chat/completions
+
+# JWT 签名密钥（HS256 要求至少 32 字节，生产环境务必通过环境变量覆盖）
+jwt:
+  secret: ${JWT_SECRET:qingke_green_plant_care_system_default_secret_change_in_prod_0123456789}

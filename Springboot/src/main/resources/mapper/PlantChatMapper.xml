@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qingke.mapper.PlantChatMapper">
+
+    <resultMap id="BaseResultMap" type="com.qingke.entity.PlantChat">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="admin_id" property="adminId"/>
+        <result column="ask" property="ask"/>
+        <result column="reply" property="reply"/>
+        <result column="is_replied" property="isReplied"/>
+        <result column="is_read" property="isRead"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="user_name" property="userName"/>
+        <result column="msg_type" property="msgType"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="findByUserId" resultMap="BaseResultMap">
+        SELECT * FROM plant_chat
+        WHERE user_id = #{userId}
+        ORDER BY create_time ASC
+    </select>
+
+    <delete id="deleteByUserId">
+        DELETE FROM plant_chat WHERE user_id = #{userId}
+    </delete>
+
+</mapper>

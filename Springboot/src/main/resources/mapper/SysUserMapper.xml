@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.qingke.mapper.SysUserMapper">
+    
+    <resultMap id="UserResultMap" type="com.qingke.entity.SysUser">
+        <id property="id" column="id"/>
+        <result property="zh" column="zh"/>
+        <result property="password" column="password"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="age" column="age"/>
+        <result property="phone" column="phone"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="registerTime" column="register_time"/>
+        <result property="lastLoginTime" column="last_login_time"/>
+        <result property="email" column="email"/>
+        <result property="status" column="status"/>
+        <result property="role" column="role"/>
+        <result property="passwordWrongNum" column="password_wrong_num"/>
+        <result property="points" column="points"/>
+        <result property="aiCount" column="ai_count"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+    
+    <select id="findByZh" resultMap="UserResultMap">
+        SELECT * FROM sys_user WHERE zh = #{zh}
+    </select>
+    
+    <select id="findByPhone" resultMap="UserResultMap">
+        SELECT * FROM sys_user WHERE phone = #{phone}
+    </select>
+    
+    <update id="increasePasswordWrongNum">
+        UPDATE sys_user SET password_wrong_num = IFNULL(password_wrong_num, 0) + 1 WHERE id = #{id}
+    </update>
+    
+    <update id="resetPasswordWrongNum">
+        UPDATE sys_user SET password_wrong_num = 0 WHERE id = #{id}
+    </update>
+    
+    <update id="updatePassword">
+        UPDATE sys_user SET password = #{password} WHERE id = #{id}
+    </update>
+    
+    <select id="findAll" resultMap="UserResultMap">
+        SELECT * FROM sys_user ORDER BY create_time DESC
+    </select>
+    
+    <select id="findByCondition" resultMap="UserResultMap">
+        SELECT * FROM sys_user
+        <where>
+            <if test="zh != null and zh != ''">AND zh LIKE CONCAT('%', #{zh}, '%')</if>
+            <if test="name != null and name != ''">AND name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test="role != null and role != ''">AND role = #{role}</if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+    
+    <select id="findById" resultMap="UserResultMap">
+        SELECT * FROM sys_user WHERE id = #{id}
+    </select>
+    
+    <delete id="deleteBatch">
+        DELETE FROM sys_user WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </delete>
+    
+    <update id="updateStatus">
+        UPDATE sys_user SET status = #{status} WHERE id = #{id}
+    </update>
+    
+    <update id="updateLastLoginTime">
+        UPDATE sys_user SET last_login_time = NOW() WHERE id = #{id}
+    </update>
+    
+    <update id="addPoints">
+        UPDATE sys_user SET points = IFNULL(points, 0) + #{delta} WHERE id = #{id}
+    </update>
+
+    <update id="deductPoints">
+        UPDATE sys_user SET points = points - #{cost} WHERE id = #{id} AND IFNULL(points, 0) >= #{cost}
+    </update>
+    
+</mapper>

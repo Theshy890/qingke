@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qingke.mapper.PlantCategoryMapper">
+
+    <resultMap id="BaseResultMap" type="com.qingke.entity.PlantCategory">
+        <id column="id" property="id"/>
+        <result column="category_name" property="categoryName"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <!-- 查询所有绿植种类 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT id, category_name, create_time
+        FROM plant_category
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据ID查询绿植种类 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT id, category_name, create_time
+        FROM plant_category
+        WHERE id = #{id}
+    </select>
+
+    <!-- 根据名称模糊查询 -->
+    <select id="selectByName" resultMap="BaseResultMap">
+        SELECT id, category_name, create_time
+        FROM plant_category
+        WHERE category_name LIKE CONCAT('%', #{categoryName}, '%')
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 分页查询绿植种类 -->
+    <select id="selectByPage" resultMap="BaseResultMap">
+        SELECT id, category_name, create_time
+        FROM plant_category
+        <where>
+            <if test="categoryName != null and categoryName != ''">
+                AND category_name LIKE CONCAT('%', #{categoryName}, '%')
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 新增绿植种类 -->
+    <insert id="insert" parameterType="com.qingke.entity.PlantCategory" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO plant_category (category_name, create_time)
+        VALUES (#{categoryName}, #{createTime})
+    </insert>
+
+    <!-- 更新绿植种类 -->
+    <update id="update" parameterType="com.qingke.entity.PlantCategory">
+        UPDATE plant_category
+        SET category_name = #{categoryName}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID删除绿植种类 -->
+    <delete id="deleteById">
+        DELETE FROM plant_category WHERE id = #{id}
+    </delete>
+
+    <!-- 批量删除绿植种类 -->
+    <delete id="deleteBatch">
+        DELETE FROM plant_category
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 检查绿植种类名称是否存在 -->
+    <select id="checkNameExists" resultType="int">
+        SELECT COUNT(*)
+        FROM plant_category
+        WHERE category_name = #{categoryName}
+        <if test="id != null">
+            AND id != #{id}
+        </if>
+    </select>
+
+</mapper>

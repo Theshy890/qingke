@@ -1,0 +1,24 @@
+# ===== Java / Maven =====
+Springboot/target/
+*.class
+
+# ===== Node =====
+Vue/node_modules/
+Vue/dist/
+*.local
+
+# ===== 日志与运行时 =====
+logs/
+*.log
+*.pid
+
+# ===== IDE / AI 工具 =====
+.idea/
+.vscode/
+.claude/
+.claudeignore
+.qoder/
+
+# ===== 敏感配置（真实密钥不进仓库）=====
+application-local.yml
+*.env
