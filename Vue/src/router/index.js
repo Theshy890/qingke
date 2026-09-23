@@ -192,6 +192,16 @@ const router = createRouter({
             }
           },
           {
+            path: 'messages',
+            name: 'UserMessages',
+            component: () => import('../views/user/Messages.vue'),
+            meta: {
+              requiresAuth: true,
+              title: '私信',
+              role: 'user'
+            }
+          },
+          {
             path: 'settings',
             name: 'UserSettings',
             component: () => import('../views/user/Settings.vue'),

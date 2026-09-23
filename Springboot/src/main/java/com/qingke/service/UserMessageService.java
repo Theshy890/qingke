@@ -14,7 +14,17 @@ public interface UserMessageService {
     /**
      * 发送私信
      */
-    void sendMessage(Long senderId, Long receiverId, String content);
+    UserMessage sendMessage(Long senderId, Long receiverId, String content, String quoteContent);
+
+    /**
+     * 撤回消息（仅发送者、2 分钟内）
+     */
+    void revokeMessage(Long messageId, Long userId);
+
+    /**
+     * 单边删除消息（仅删除者自己不可见）
+     */
+    void deleteMessage(Long messageId, Long userId);
 
     /**
      * 获取会话列表

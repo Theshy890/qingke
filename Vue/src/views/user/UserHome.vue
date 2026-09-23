@@ -48,6 +48,9 @@
                 <el-dropdown-item command="profile">
                   <el-icon><User /></el-icon>个人主页
                 </el-dropdown-item>
+                <el-dropdown-item command="messages">
+                  <el-icon><ChatLineRound /></el-icon>私信
+                </el-dropdown-item>
                 <el-dropdown-item command="settings">
                   <el-icon><Setting /></el-icon>设置
                 </el-dropdown-item>
@@ -95,7 +98,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { sysNoticeApi, messageCenterApi } from '@/api'
@@ -107,11 +110,11 @@ import logoImg from '@/assets/img/logo.png'
 import CustomerService from '@/components/common/CustomerService.vue'
 const router = useRouter()
 
-// 用户信息
-const userInfo = reactive({
+// 用户信息（响应式跟随 store，资料更新后顶栏即时刷新）
+const userInfo = computed(() => ({
   name: store.user.userInfo?.name || '',
   avatarUrl: store.user.userInfo?.avatarUrl || ''
-})
+}))
 
 const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyNCIgZmlsbD0iIzUyYzQxYSIvPjxwYXRoIGQ9Ik0yNCAyNkMyOC40MTgzIDI2IDMyIDIyLjQxODMgMzIgMThDMzIgMTMuNTgxNyAyOC40MTgzIDEwIDI0IDEwQzE5LjU4MTcgMTAgMTYgMTMuNTgxNyAxNiAxOEMxNiAyMi40MTgzIDE5LjU4MTcgMjYgMjQgMjZaIiBmaWxsPSJ3aGl0ZSIvPjxwYXRoIGQ9Ik0xMiAzOEMxMiAzMi40NzcyIDE2LjQ3NzIgMjggMjIgMjhIMjZDMzEuNTIyOCAyOCAzNiAzMi40NzcyIDM2IDM4VjQwSDEyVjM4WiIgZmlsbD0id2hpdGUiLz48L3N2Zz4='
 
@@ -158,6 +161,9 @@ const handleUserCommand = (command) => {
       }
       break
     }
+    case 'messages':
+      router.push('/user/messages')
+      break
     case 'settings':
       router.push('/user/settings')
       break

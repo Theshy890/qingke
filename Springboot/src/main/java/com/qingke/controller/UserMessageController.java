@@ -24,9 +24,41 @@ public class UserMessageController {
      * 发送私信
      */
     @PostMapping("/send")
-    public Result<?> sendMessage(@RequestParam Long senderId, @RequestParam Long receiverId, @RequestParam String content) {
-        userMessageService.sendMessage(senderId, receiverId, content);
-        return Result.success("发送成功");
+    public Result<?> sendMessage(@RequestParam Long senderId, @RequestParam Long receiverId,
+                                 @RequestParam String content,
+                                 @RequestParam(required = false) String quoteContent) {
+        try {
+            UserMessage message = userMessageService.sendMessage(senderId, receiverId, content, quoteContent);
+            return Result.success(message);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 撤回消息（仅发送者、2 分钟内）
+     */
+    @PutMapping("/revoke")
+    public Result<?> revokeMessage(@RequestParam Long messageId, @RequestParam Long userId) {
+        try {
+            userMessageService.revokeMessage(messageId, userId);
+            return Result.success("撤回成功");
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 删除消息（单边删除，仅自己不可见）
+     */
+    @DeleteMapping("/delete")
+    public Result<?> deleteMessage(@RequestParam Long messageId, @RequestParam Long userId) {
+        try {
+            userMessageService.deleteMessage(messageId, userId);
+            return Result.success("删除成功");
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
     }
 
     /**

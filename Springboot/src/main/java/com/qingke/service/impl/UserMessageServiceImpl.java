@@ -23,6 +23,9 @@ import java.util.Map;
 @Service
 public class UserMessageServiceImpl implements UserMessageService {
 
+    // 撤回时限：发送后 2 分钟内
+    private static final long REVOKE_TIME_LIMIT = 2 * 60 * 1000L;
+
     @Autowired
     private UserMessageMapper userMessageMapper;
 
@@ -30,20 +33,70 @@ public class UserMessageServiceImpl implements UserMessageService {
     private SysUserMapper sysUserMapper;
 
     @Override
-    public void sendMessage(Long senderId, Long receiverId, String content) {
+    public UserMessage sendMessage(Long senderId, Long receiverId, String content, String quoteContent) {
         UserMessage message = new UserMessage();
         message.setSenderId(senderId);
         message.setReceiverId(receiverId);
         message.setContent(content);
+        message.setQuoteContent(quoteContent);
+        message.setIsRecalled(0);
+        message.setSenderDeleted(0);
+        message.setReceiverDeleted(0);
         message.setIsRead(0);
         userMessageMapper.insert(message);
+        return message;
+    }
+
+    @Override
+    public void revokeMessage(Long messageId, Long userId) {
+        UserMessage msg = userMessageMapper.selectById(messageId);
+        if (msg == null) {
+            throw new RuntimeException("消息不存在");
+        }
+        if (!msg.getSenderId().equals(userId)) {
+            throw new RuntimeException("只能撤回自己发送的消息");
+        }
+        if (msg.getIsRecalled() != null && msg.getIsRecalled() == 1) {
+            throw new RuntimeException("消息已撤回");
+        }
+        long elapsed = System.currentTimeMillis() - msg.getCreateTime().getTime();
+        if (elapsed > REVOKE_TIME_LIMIT) {
+            throw new RuntimeException("超过 2 分钟，无法撤回");
+        }
+
+        UserMessage update = new UserMessage();
+        update.setId(messageId);
+        update.setIsRecalled(1);
+        userMessageMapper.updateById(update);
+    }
+
+    @Override
+    public void deleteMessage(Long messageId, Long userId) {
+        UserMessage msg = userMessageMapper.selectById(messageId);
+        if (msg == null) {
+            throw new RuntimeException("消息不存在");
+        }
+        if (!msg.getSenderId().equals(userId) && !msg.getReceiverId().equals(userId)) {
+            throw new RuntimeException("无权删除该消息");
+        }
+
+        UserMessage update = new UserMessage();
+        update.setId(messageId);
+        if (msg.getSenderId().equals(userId)) {
+            update.setSenderDeleted(1);
+        } else {
+            update.setReceiverDeleted(1);
+        }
+        userMessageMapper.updateById(update);
     }
 
     @Override
     public List<ConversationDTO> getConversations(Long userId) {
-        // 查询所有相关消息（作为发送者或接收者）
+        // 查询所有相关消息（作为发送者或接收者），排除本人已单边删除的
         QueryWrapper<UserMessage> wrapper = new QueryWrapper<>();
         wrapper.and(w -> w.eq("sender_id", userId).or().eq("receiver_id", userId));
+        wrapper.not(w -> w.eq("sender_id", userId).eq("sender_deleted", 1));
+        wrapper.not(w -> w.eq("receiver_id", userId).eq("receiver_deleted", 1));
         wrapper.orderByDesc("create_time");
 
         List<UserMessage> messages = userMessageMapper.selectList(wrapper);
@@ -57,7 +110,8 @@ public class UserMessageServiceImpl implements UserMessageService {
             if (!conversationMap.containsKey(targetUserId)) {
                 ConversationDTO conversation = new ConversationDTO();
                 conversation.setUserId(targetUserId);
-                conversation.setLastMessage(msg.getContent());
+                conversation.setLastMessage(
+                        msg.getIsRecalled() != null && msg.getIsRecalled() == 1 ? "[撤回了一条消息]" : msg.getContent());
                 conversation.setLastMessageTime(msg.getCreateTime());
 
                 // 查询用户信息
@@ -72,6 +126,8 @@ public class UserMessageServiceImpl implements UserMessageService {
                 unreadWrapper.eq("sender_id", targetUserId);
                 unreadWrapper.eq("receiver_id", userId);
                 unreadWrapper.eq("is_read", 0);
+                unreadWrapper.eq("is_recalled", 0);
+                unreadWrapper.eq("receiver_deleted", 0);
                 conversation.setUnreadCount(userMessageMapper.selectCount(unreadWrapper).intValue());
 
                 conversationMap.put(targetUserId, conversation);
@@ -87,6 +143,9 @@ public class UserMessageServiceImpl implements UserMessageService {
         QueryWrapper<UserMessage> wrapper = new QueryWrapper<>();
         wrapper.and(w -> w.and(w1 -> w1.eq("sender_id", userId).eq("receiver_id", targetUserId))
                 .or(w2 -> w2.eq("sender_id", targetUserId).eq("receiver_id", userId)));
+        // 排除本人已单边删除的消息
+        wrapper.not(w -> w.eq("sender_id", userId).eq("sender_deleted", 1));
+        wrapper.not(w -> w.eq("receiver_id", userId).eq("receiver_deleted", 1));
         wrapper.orderByDesc("create_time");
 
         return new PageInfo<>(userMessageMapper.selectList(wrapper));

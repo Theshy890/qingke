@@ -1,8 +1,15 @@
 package com.qingke.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.qingke.entity.CommunityComment;
+import com.qingke.entity.CommunityPost;
+import com.qingke.entity.PlantChat;
 import com.qingke.entity.SysUser;
+import com.qingke.mapper.CommunityCommentMapper;
+import com.qingke.mapper.CommunityPostMapper;
+import com.qingke.mapper.PlantChatMapper;
 import com.qingke.mapper.SysUserMapper;
 import com.qingke.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +22,15 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Autowired
     private SysUserMapper sysUserMapper;
+
+    @Autowired
+    private CommunityPostMapper communityPostMapper;
+
+    @Autowired
+    private CommunityCommentMapper communityCommentMapper;
+
+    @Autowired
+    private PlantChatMapper plantChatMapper;
 
     @Override
     public SysUser findByZh(String zh) { return sysUserMapper.findByZh(zh); }
@@ -48,7 +64,49 @@ public class SysUserServiceImpl implements SysUserService {
     public void add(SysUser user) { sysUserMapper.insert(user); }
 
     @Override
-    public void update(SysUser user) { sysUserMapper.updateById(user); }
+    public void update(SysUser user) {
+        sysUserMapper.updateById(user);
+        // 头像/昵称变更后同步冗余存储的快照数据（帖子/评论/AI聊天记录），保证全站即时一致
+        if (user.getId() != null) {
+            SysUser fresh = sysUserMapper.findById(user.getId());
+            if (fresh != null) {
+                syncUserSnapshot(fresh);
+            }
+        }
+    }
+
+    /**
+     * 将用户最新的头像与昵称同步到冗余存储的业务表
+     */
+    private void syncUserSnapshot(SysUser user) {
+        if (user.getAvatarUrl() != null) {
+            UpdateWrapper<CommunityPost> postWrapper = new UpdateWrapper<>();
+            postWrapper.eq("user_id", user.getId()).set("avatar_url", user.getAvatarUrl());
+            communityPostMapper.update(null, postWrapper);
+
+            UpdateWrapper<CommunityComment> commentWrapper = new UpdateWrapper<>();
+            commentWrapper.eq("user_id", user.getId()).set("avatar_url", user.getAvatarUrl());
+            communityCommentMapper.update(null, commentWrapper);
+
+            UpdateWrapper<PlantChat> chatWrapper = new UpdateWrapper<>();
+            chatWrapper.eq("user_id", user.getId()).set("avatar_url", user.getAvatarUrl());
+            plantChatMapper.update(null, chatWrapper);
+        }
+
+        if (user.getName() != null) {
+            UpdateWrapper<CommunityPost> postWrapper = new UpdateWrapper<>();
+            postWrapper.eq("user_id", user.getId()).set("user_account", user.getName());
+            communityPostMapper.update(null, postWrapper);
+
+            UpdateWrapper<CommunityComment> commentWrapper = new UpdateWrapper<>();
+            commentWrapper.eq("user_id", user.getId()).set("nickname", user.getName());
+            communityCommentMapper.update(null, commentWrapper);
+
+            UpdateWrapper<PlantChat> chatWrapper = new UpdateWrapper<>();
+            chatWrapper.eq("user_id", user.getId()).set("user_name", user.getName());
+            plantChatMapper.update(null, chatWrapper);
+        }
+    }
 
     @Override
     public void deleteById(Long id) { sysUserMapper.deleteById(id); }

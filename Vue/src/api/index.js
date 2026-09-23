@@ -691,6 +691,90 @@ export const userVisitorApi = {
       method: 'post',
       params: { userId, visitorId }
     })
+  },
+  // 获取访客列表
+  getVisitorList: (userId, pageNum = 1, pageSize = 20) => {
+    return request({
+      url: '/api/userVisitor/list',
+      method: 'get',
+      params: { userId, pageNum, pageSize }
+    })
+  },
+  // 标记访客记录已读
+  markAsRead: (userId) => {
+    return request({
+      url: '/api/userVisitor/markRead',
+      method: 'put',
+      params: { userId }
+    })
+  },
+  // 获取未读访客数量
+  getUnreadCount: (userId) => {
+    return request({
+      url: '/api/userVisitor/unreadCount',
+      method: 'get',
+      params: { userId }
+    })
+  }
+}
+
+// 私信相关 API
+export const userMessageApi = {
+  // 发送私信
+  sendMessage: (senderId, receiverId, content, quoteContent) => {
+    return request({
+      url: '/api/userMessage/send',
+      method: 'post',
+      params: { senderId, receiverId, content, quoteContent }
+    })
+  },
+  // 撤回消息
+  revokeMessage: (messageId, userId) => {
+    return request({
+      url: '/api/userMessage/revoke',
+      method: 'put',
+      params: { messageId, userId }
+    })
+  },
+  // 删除消息（单边）
+  deleteMessage: (messageId, userId) => {
+    return request({
+      url: '/api/userMessage/delete',
+      method: 'delete',
+      params: { messageId, userId }
+    })
+  },
+  // 获取会话列表
+  getConversations: (userId) => {
+    return request({
+      url: '/api/userMessage/conversations',
+      method: 'get',
+      params: { userId }
+    })
+  },
+  // 获取与某用户的聊天记录
+  getChatHistory: (userId, targetUserId, pageNum = 1, pageSize = 50) => {
+    return request({
+      url: '/api/userMessage/detail',
+      method: 'get',
+      params: { userId, targetUserId, pageNum, pageSize }
+    })
+  },
+  // 标记与某用户的消息已读
+  markAsRead: (userId, targetUserId) => {
+    return request({
+      url: '/api/userMessage/markRead',
+      method: 'put',
+      params: { userId, targetUserId }
+    })
+  },
+  // 获取未读私信总数
+  getUnreadCount: (userId) => {
+    return request({
+      url: '/api/userMessage/unreadCount',
+      method: 'get',
+      params: { userId }
+    })
   }
 }
 

@@ -495,7 +495,9 @@ const handleSaveProfile = async () => {
       const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
       const updatedUserInfo = { ...userInfo, ...profileForm }
       localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo))
-      
+      // 同步响应式 store，保证顶栏等读取 store 的组件即时刷新头像/昵称
+      store.setUser(updatedUserInfo)
+
       ElMessage.success('保存成功')
     } else {
       ElMessage.error(res.message || '保存失败')

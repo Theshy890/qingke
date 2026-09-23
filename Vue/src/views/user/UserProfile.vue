@@ -12,7 +12,7 @@
           <p class="user-signature">{{ userProfile.signature || '这个人很懒，什么都没留下~' }}</p>
         </div>
 
-        <!-- 关注按钮（仅访问他人主页时显示） -->
+        <!-- 关注/私信按钮（仅访问他人主页时显示） -->
         <div v-if="!isMyProfile" class="follow-button-section">
           <el-button
             :type="followStats.isFollowing ? 'default' : 'success'"
@@ -21,6 +21,9 @@
             size="large"
           >
             {{ followStats.isFollowing ? '已关注' : '+ 关注' }}
+          </el-button>
+          <el-button class="message-button" round size="large" @click="goToChat">
+            私信
           </el-button>
         </div>
       </div>
@@ -38,6 +41,12 @@
         <div class="stat-item">
           <span class="stat-number">{{ followStats.likesCount || 0 }}</span>
           <span class="stat-label">获赞</span>
+        </div>
+        <div v-if="isMyProfile" class="stat-item clickable" @click="showVisitorsList">
+          <el-badge :value="visitorUnread" :hidden="visitorUnread === 0" :max="99">
+            <span class="stat-number">{{ visitorTotal || 0 }}</span>
+          </el-badge>
+          <span class="stat-label">访客</span>
         </div>
       </div>
     </div>
@@ -263,6 +272,43 @@
         </div>
       </div>
     </el-drawer>
+
+    <!-- 访客列表抽屉 -->
+    <el-drawer v-model="visitorDrawerVisible" title="访客记录" direction="rtl" size="420px">
+      <div class="visitor-list-content">
+        <div v-if="visitorList.length === 0" class="empty-notice">
+          <el-empty description="暂无访客记录" />
+        </div>
+        <div v-else class="user-list">
+          <div v-for="item in visitorList" :key="item.id" class="user-item">
+            <el-avatar
+              :size="50"
+              :src="item.visitorAvatar || defaultAvatar"
+              class="clickable-avatar"
+              @click="goToUserProfile(item.visitorId)"
+            >
+              <el-icon><User /></el-icon>
+            </el-avatar>
+            <div class="user-info clickable-user" @click="goToUserProfile(item.visitorId)">
+              <h4>{{ item.visitorNickname || '用户' }}</h4>
+              <p class="visit-time">{{ item.visitTime }}</p>
+            </div>
+            <el-tag v-if="item.isRead === 0" type="danger" size="small" effect="light">未读</el-tag>
+          </div>
+
+          <el-pagination
+            v-if="visitorTotal > visitorPageSize"
+            background
+            layout="prev, pager, next"
+            :total="visitorTotal"
+            :page-size="visitorPageSize"
+            :current-page="visitorPageNum"
+            @current-change="handleVisitorPageChange"
+            class="pagination"
+          />
+        </div>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
@@ -332,6 +378,14 @@ const followSearchQuery = ref('')
 const followingList = ref([])
 const followersList = ref([])
 
+// 访客列表抽屉
+const visitorDrawerVisible = ref(false)
+const visitorList = ref([])
+const visitorPageNum = ref(1)
+const visitorPageSize = ref(20)
+const visitorTotal = ref(0)
+const visitorUnread = ref(0)
+
 // 加载用户主页信息
 const loadUserProfile = async () => {
   try {
@@ -352,6 +406,9 @@ const loadUserProfile = async () => {
         userVisitorApi.recordVisit(userId, currentUser.id).catch(err => {
           console.error('记录访客失败:', err)
         })
+      } else if (isMyProfile.value) {
+        // 本人主页：加载访客统计
+        loadVisitorStats()
       }
     } else {
       ElMessage.error(res.message || '加载用户信息失败')
@@ -391,6 +448,59 @@ const loadUserPosts = async () => {
   } catch (error) {
     console.error('加载用户帖子失败:', error)
   }
+}
+
+// 加载访客统计（仅本人主页：总数 + 未读数）
+const loadVisitorStats = async () => {
+  try {
+    const [listRes, unreadRes] = await Promise.all([
+      userVisitorApi.getVisitorList(currentUser.id, 1, 1),
+      userVisitorApi.getUnreadCount(currentUser.id)
+    ])
+    if (listRes.code === 200) {
+      visitorTotal.value = listRes.data.total || 0
+    }
+    if (unreadRes.code === 200) {
+      visitorUnread.value = unreadRes.data || 0
+    }
+  } catch (error) {
+    console.error('加载访客统计失败:', error)
+  }
+}
+
+// 加载访客列表
+const loadVisitorList = async () => {
+  try {
+    const res = await userVisitorApi.getVisitorList(currentUser.id, visitorPageNum.value, visitorPageSize.value)
+    if (res.code === 200) {
+      visitorList.value = res.data.list || []
+      visitorTotal.value = res.data.total || 0
+    }
+  } catch (error) {
+    console.error('加载访客列表失败:', error)
+  }
+}
+
+// 打开访客抽屉：加载列表并标记全部已读
+const showVisitorsList = async () => {
+  visitorDrawerVisible.value = true
+  visitorPageNum.value = 1
+  await loadVisitorList()
+  if (visitorUnread.value > 0) {
+    try {
+      await userVisitorApi.markAsRead(currentUser.id)
+      visitorUnread.value = 0
+      visitorList.value = visitorList.value.map(item => ({ ...item, isRead: 1 }))
+    } catch (error) {
+      console.error('标记访客已读失败:', error)
+    }
+  }
+}
+
+// 访客列表分页
+const handleVisitorPageChange = (page) => {
+  visitorPageNum.value = page
+  loadVisitorList()
 }
 
 // 加载养护记录
@@ -595,6 +705,15 @@ const goToUserProfile = (userId) => {
   window.open(routeUrl.href, '_blank')
 }
 
+// 发起私信（跳转私信页并自动打开与对方的会话）
+const goToChat = () => {
+  if (!currentUser.id) {
+    ElMessage.warning('请先登录')
+    return
+  }
+  router.push(`/user/messages?to=${route.params.userId}`)
+}
+
 // 跳转到帖子详情
 const goToPostDetail = (postId) => {
   router.push(`/community/detail/${postId}`)
@@ -649,12 +768,16 @@ onMounted(() => {
 
 .follow-button-section {
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .follow-button-section .el-button {
   padding: 12px 30px;
   font-size: 15px;
   font-weight: 500;
+  margin-left: 0;
 }
 
 .stats-bar {
@@ -936,6 +1059,16 @@ onMounted(() => {
   margin: 0;
   font-size: 13px;
   color: #999;
+}
+
+.visit-time {
+  font-size: 12px;
+}
+
+.visitor-list-content {
+  padding: 16px;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
 }
 
 /* 关注/粉丝合并抽屉样式 */
