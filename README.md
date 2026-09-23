@@ -67,74 +67,28 @@
 
 ## 🛠 技术栈
 
-### 前端（`Vue/`）
+| 层 | 技术 |
+|---|---|
+| 前端 | Vue 3.5 · Vite 7 · Element Plus 2.11 · ECharts 5.5 · Sass |
+| 后端 | Spring Boot 3.2（Java 17）· MyBatis-Plus · PageHelper · Quartz · JWT |
+| AI | 智谱 GLM-4.6V-Flash（OkHttp 调用，多 Key 轮询 + 降级） |
+| 数据 | MySQL 8（HikariCP） |
 
-- **Vue 3.5** + **Vite 7** + Vue Router 4（Composition API）
-- **Element Plus 2.11**（按需自动导入：unplugin-auto-import / unplugin-vue-components）
-- **ECharts 5.5**（后台数据可视化）、ExcelJS（报表导出）
-- Axios 封装（JWT 拦截器、401 统一处理、响应码拦截）
-- Sass 样式 + 自定义卡通主题
-
-### 后端（`Springboot/`）
-
-- **Spring Boot 3.2**（Java 17）+ Spring Web + AOP
-- **MyBatis-Plus 3.5** + PageHelper 分页
-- **MySQL 8** 
-- **JWT**（jjwt 0.11）鉴权：签发携带角色声明的 Token，管理端敏感接口由 `AdminAuthInterceptor` 按路径清单拦截校验
-- **Quartz** 定时任务（每小时从养护记录批量生成站内提醒）
-- OkHttp + 智谱 GLM-4.6V-Flash API（多模态识别与诊断，多 Key 轮询 + 失败降级）
-- Hutool、Lombok、统一响应体 `Result<T>`、全局异常处理
+> 架构设计、选型理由与实现细节见 [docs/DESIGN.md](docs/DESIGN.md)。
 
 ## 📁 项目结构
 
-### 双端架构
-
-同一套前后端服务承载两个独立入口，通过路由前缀 + JWT 角色声明分离：
-
-```
-                         ┌─────────────────────────┐
-   用户端 /#/user/*  ──► │  Vue 3 SPA（同一应用）    │
-   管理端 /#/admin/* ──► │  路由守卫按 role 分流登录  │
-                         └───────────┬─────────────┘
-                                     │ /api（Vite 代理 / 同域）
-                         ┌───────────▼─────────────┐
-                         │  Spring Boot 3.2        │
-                         │  JwtUtil 签发含 role 的  │
-                         │  Token；管理端敏感接口由  │
-                         │  AdminAuthInterceptor    │
-                         │  按路径清单拦截校验       │
-                         └───────────┬─────────────┘
-                                     │ MyBatis-Plus
-                         ┌───────────▼─────────────┐
-                         │  MySQL 8（qingke 库）    │
-                         └─────────────────────────┘
-```
-
-- **用户端**：登录走 `/api/sys-user/app-login`，Token 存入 localStorage，可访问知识库、AI 识别、养护记录、社区等
-- **管理端**：独立登录页（`AdminLogin.vue`），`WebConfig` 中 `AdminAuthInterceptor` 按路径白名单拦截用户管理、内容审核、操作日志等敏感接口，普通用户 Token 无法越权
-
 ```
 qingke/
-├── Springboot/                  # 后端服务
-│   └── src/main/java/com/qingke/
-│       ├── common/              # JWT、统一响应、全局异常、AOP 日志切面
-│       ├── config/              # Quartz、MyBatis-Plus、AI 客户端等配置
-│       ├── controller/          # REST 接口（用户端 + 管理端）
-│       ├── entity/ mapper/      # MyBatis-Plus 实体与数据访问
-│       ├── service/             # 业务逻辑
-│       ├── interceptor/         # 管理端 JWT 鉴权拦截器
-│       └── job/                 # Quartz 定时任务
-├── Vue/                         # 前端应用
-│   └── src/
-│       ├── api/                 # 接口封装（axios）
-│       ├── views/admin/         # 后台管理页面
-│       ├── views/user/          # 用户端页面
-│       ├── components/          # 通用组件（AI 客服、提醒弹窗等）
-│       └── router/ store/       # 路由 / 全局状态
-└── db/                          # 数据库建表脚本
+├── Springboot/                  # 后端服务（controller / service / mapper / common / config / interceptor）
+├── Vue/                         # 前端应用（api / router / store / views/user / views/admin / components）
+├── db/qingke.sql                # 数据库建表脚本
+├── docs/                        # 设计文档与界面截图
+├── PRD.md                       # 产品需求文档
+└── README.md
 ```
 
-> 根目录另含本说明文档 `README.md`：项目定位、功能范围调整说明、技术栈、快速启动与第三方服务申请指南。
+> 双端 SPA 架构（路由前缀 + JWT 角色声明分离）说明见 [docs/DESIGN.md § 2](docs/DESIGN.md)。
 
 ## 🚀 快速启动
 
