@@ -28,20 +28,39 @@
 
 ### 1.2 功能全景
 
-![功能全景图](images/feature-map.png)
-
-> 占位说明：待补 `docs/images/feature-map.png`。ASCII 兜底：
-
-```
-                    青稞绿植
-        ┌───────────────┴───────────────┐
-     用户端(卡通风)                  管理端(深色风)
-   ┌────┼────┬────┬────┐        ┌────┼────┬────┬────┐
-  知识库 AI识别 AI客服 养护     用户  内容  审核  统计
-   │     │诊断+识别 │  记录     管理  管理  先审  面板
-   │     │积分10/次 │  Quartz    操作日志  公告  异常记录
-  收藏  多Key轮询  聊天持久化   提醒
-   └─────┴───社区────┴── 私信(撤回/删除/引用) 访客足迹 ──┘
+```mermaid
+mindmap
+  root((青稞绿植))
+    用户端 · 卡通风
+      养护知识库
+        分类 / 搜索 / 热度排序
+        收藏
+      AI 识别与病害诊断
+        单次多模态调用
+        积分 10/次 · 异常退还
+        多 Key 轮询 + 降级
+      AI 客服
+        文字 / 图片提问
+        会话持久化
+      养护记录与提醒
+        周期记录
+        Quartz 生成站内提醒
+        日历导出
+      积分体系
+        每日签到
+      社区
+        发帖 / 评论 / 点赞 / 关注
+        私信（撤回 / 删除 / 引用）
+        访客足迹
+    管理端 · 深色风
+      数据面板 ECharts
+      用户管理
+      内容管理
+        分类 / 知识
+      社区审核 · 先审后发
+      识别 / 养护记录
+      系统管理
+        公告 · 操作日志 · 异常记录
 ```
 
 ### 1.3 仓库结构
@@ -53,7 +72,7 @@ qingke/
 ├── db/qingke.sql        # 建表 + 初始化数据脚本
 ├── docs/                # 本设计文档与截图
 │   ├── screenshots/     # 16 张界面截图（用户端 8 + 管理端 8）
-│   └── images/          # 架构/ER/流程等设计图
+│   └── images/          # 补充设计图（核心图表已用 Mermaid 内嵌）
 ├── PRD.md               # 产品需求文档
 └── README.md            # 项目说明与快速启动
 ```
@@ -64,49 +83,56 @@ qingke/
 
 ### 2.1 总体架构
 
-![系统架构图](images/architecture.png)
-
-```
-┌──────────────────────────────────────────────┐
-│                Vue 3 SPA（同一应用）            │
-│   /#/user/*  用户端        /#/admin/*  管理端   │
-│   路由守卫按 JWT role 声明分流                  │
-└──────────────────┬───────────────────────────┘
-                   │ /api（Vite proxy → 8080）
-┌──────────────────▼───────────────────────────┐
-│            Spring Boot 3.2 (Java 17)          │
-│  Controller → Service → Mapper(MyBatis-Plus)  │
-│  ├ JwtUtil 签发含 role 的 Token                │
-│  ├ AdminAuthInterceptor 管理端路径清单拦截      │
-│  ├ OperationLogAspect  AOP 操作审计(异步落库)   │
-│  ├ GlobalExceptionHandler 异常持久化            │
-│  └ Quartz 每小时扫描养护记录 → 生成站内提醒      │
-└──────┬──────────────────────────┬────────────
-       │ OkHttp(多Key轮询)         │ HikariCP 连接池
-┌──────▼──────┐            ┌──────▼──────┐
-│ 智谱 GLM-4.6V│            │  MySQL 8    │
-│ -Flash 多模态 │            │ (qingke 库) │
-└─────────────┘            └─────────────┘
+```mermaid
+flowchart TB
+    subgraph SPA["Vue 3 SPA（同一应用）"]
+        U["用户端 /#/user/*"]
+        A["管理端 /#/admin/*"]
+        G["路由守卫按 JWT role 分流"]
+    end
+    SPA -->|"/api（Vite proxy → 8080）"| BE
+    subgraph BE["Spring Boot 3.2 (Java 17)"]
+        C2["Controller → Service → Mapper (MyBatis-Plus)"]
+        JWT["JwtUtil 签发含 role 的 Token"]
+        INT["AdminAuthInterceptor 管理端路径清单拦截"]
+        AOP["OperationLogAspect AOP 操作审计（异步落库）"]
+        EXC["GlobalExceptionHandler 异常持久化"]
+        QTZ["Quartz 每小时扫描养护记录 → 生成站内提醒"]
+    end
+    BE -->|OkHttp 多 Key 轮询| ZP["智谱 GLM-4.6V-Flash 多模态"]
+    BE -->|HikariCP 连接池| DB["MySQL 8（qingke 库）"]
 ```
 
 ### 2.2 一次 AI 识别的时序
 
-![请求时序图](images/sequence.png)
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant V as Vue 前端
+    participant C as Controller
+    participant S as Service
+    participant Z as 智谱 API
+    participant D as MySQL
 
-```
-用户        Vue           Controller        Service          智谱API       DB
- │  拍照上传   │               │                 │                │          │
- │───────────►│ compressImage │                 │                │          │
- │            │──POST /recognize──────────────►│                │          │
- │            │               │─deductPoints(10)─────────────────────────►│ 原子扣减
- │            │               │──recognizePlantDisease────────►│          │
- │            │               │                 │─Key轮询(失败换下一个)──►│  │
- │            │               │                 │◄──────────────│          │
- │            │               │   异常→addPoints(10)退还        │          │
- │            │               │   全失效→降级示例结果(正常计费)   │          │
- │            │               │──saveRecord(识别历史)────────────────────►│
- │            │◄─Result<AiRecognitionResponse>─│                │          │
- │  展示结果   │               │                 │                │          │
+    U->>V: 拍照上传
+    V->>V: compressImage 压缩转 base64
+    V->>C: POST /api/plant-recognize/recognize
+    C->>D: deductPoints(10) 条件原子扣减
+    alt 积分不足
+        C-->>V: 提示次数不足（未扣费）
+    end
+    C->>S: recognizePlantDisease
+    S->>Z: Key 轮询调用（失败自动换下一个）
+    alt 识别过程异常
+        C->>D: addPoints(10) 全额退还
+        C-->>V: 友好错误提示
+    else 全部 Key 失效
+        S->>S: 降级返回示例结果（正常计费）
+    end
+    S-->>C: AiRecognitionResponse
+    C->>D: saveRecord 保存识别历史
+    C-->>V: Result 响应
+    V-->>U: 展示识别与诊断结果
 ```
 
 ### 2.3 鉴权设计
@@ -147,33 +173,61 @@ qingke/
 
 ### 4.1 ER 总览
 
-![ER 图](images/er.png)
-
 16 张表，以 `sys_user` 为中心分四组：
 
-```
-                 ┌───────────── 内容组 ─────────────┐
-                 │ plant_category 1──N plant_knowledge │
-                 │ community_post 1──N community_comment│
-                 │ plant_chat（AI客服会话）             │
-                 └───────────────┬─────────────────────┘
-                                 │ user_id
- ┌── 行为组 ──────────────  sys_user  ──────────── 服务组 ──────────┐
- │ user_collect（收藏）      │  id / zh / name / avatar_url /       │
- │ user_follow（关注）       │  points / role / status / 密保 /     │
- │ user_visitor（访客足迹）  │  隐私设置字段                          │
- │ user_message（私信，      └──────────────────────────────────────┘
- │  含撤回/引用/单边删除）        │
- │                          ├── 治理组 ──────────────────────────────┤
- │                          │ operation_log（AOP 操作留痕）           │
- │                          │ system_error（全局异常持久化）           │
- │                          │ sys_notice（提醒/公告，isRead 状态）     │
- │                          │ plant_maintain_record ──提醒生成来源──┘  │
- │                          │ plant_recognize（识别历史）              │
- └──────────────────────────────────────────────────────────────────┘
+```mermaid
+erDiagram
+    sys_user ||--o{ user_collect : "收藏"
+    sys_user ||--o{ user_follow : "关注/粉丝"
+    sys_user ||--o{ user_visitor : "访客足迹"
+    sys_user ||--o{ user_message : "私信(撤回/单边删除/引用)"
+    sys_user ||--o{ community_post : "发帖"
+    sys_user ||--o{ community_comment : "评论"
+    sys_user ||--o{ plant_chat : "AI客服会话"
+    sys_user ||--o{ plant_maintain_record : "养护记录"
+    sys_user ||--o{ plant_recognize : "识别历史"
+    sys_user ||--o{ sys_notice : "提醒/公告"
+    sys_user ||--o{ operation_log : "操作留痕"
+    plant_category ||--o{ plant_knowledge : "分类组织"
+    plant_category ||--o{ plant_maintain_record : "植物归类"
+    community_post ||--o{ community_comment : "两级评论"
+    plant_maintain_record ||--o{ sys_notice : "Quartz 生成提醒"
+
+    sys_user {
+        bigint id PK
+        varchar zh "账号"
+        varchar name "昵称"
+        longtext avatar_url "头像"
+        int points "积分"
+        varchar role "user-admin"
+        tinyint status "启用停用"
+    }
+    user_message {
+        bigint id PK
+        bigint sender_id FK
+        bigint receiver_id FK
+        text content
+        varchar quote_content "引用快照"
+        tinyint is_recalled "撤回"
+        tinyint sender_deleted "单边删除"
+        tinyint receiver_deleted "单边删除"
+    }
+    community_post {
+        bigint id PK
+        bigint user_id FK
+        varchar avatar_url "冗余快照"
+        tinyint audit_status "先审后发"
+    }
+    plant_knowledge {
+        bigint id PK
+        bigint category_id FK
+        int click_num "热度排序"
+        int collect_num
+    }
 ```
 
-> `sys_email_verify_code` 为邮箱验证裁剪后的遗留表，保留结构未启用。
+> `sys_email_verify_code` 为邮箱验证裁剪后的遗留表，保留结构未启用；`system_error` 独立记录全局异常。
+> 帖子/评论/聊天/识别记录冗余存头像昵称，`SysUserServiceImpl.update()` 资料变更时同步刷新（§5.2）。
 
 ### 4.2 表清单与关键设计
 
@@ -256,20 +310,32 @@ Vue/src
 
 ### 6.2 路由结构
 
-![路由结构图](images/router.png)
+```mermaid
+flowchart LR
+    R["/ 根路径"] -->|已登录按角色| H
+    R -->|未登录| L["/login · /register"]
+    R --> X["/admin/login · /notFound · 404 兜底"]
 
-```
-/ ──重定向──► /login | /user/index
-├── /login /register /admin/login /notFound /:pathMatch(.*)
-├── /user (UserHome 布局, requiresAuth, role=user)
-│   ├── index / plant-care / knowledge / community
-│   ├── ai-diagnosis / reminders / favorites
-│   ├── messages(私信) / settings / newbie-guide
-│   └── /user/profile/:userId（他人主页，独立路径）
-└── /admin (Home 布局, requiresAuth, role=admin)
-    ├── dashboard / users / plant-category / plant-knowledge
-    ├── plant-maintain-record / plant-recognize
-    └── community-post / system / profile
+    subgraph H["/user（UserHome 布局 · requiresAuth · role=user）"]
+        H1["index 首页"]
+        H2["knowledge 知识库"]
+        H3["ai-diagnosis AI识别"]
+        H4["plant-care 养护记录"]
+        H5["reminders 提醒"]
+        H6["community 社区"]
+        H7["messages 私信"]
+        H8["favorites / settings / newbie-guide"]
+    end
+    P["/user/profile/:userId 他人主页"] -.-> H
+
+    subgraph AD["/admin（Home 布局 · requiresAuth · role=admin）"]
+        A1["dashboard 面板"]
+        A2["users 用户管理"]
+        A3["plant-category / plant-knowledge"]
+        A4["plant-maintain-record / plant-recognize"]
+        A5["community-post 审核"]
+        A6["system / profile"]
+    end
 ```
 
 ### 6.3 实现要点
@@ -359,21 +425,15 @@ cd Vue && npm install && npm run dev        # /api 代理到 8080
 |---|---|---|
 | 智谱 AI GLM-4.6V-Flash | 识别/诊断/AI客服 | https://open.bigmodel.cn/ （免费额度，支持多 Key） |
 
-### 9.2 设计图占位清单（docs/images/）
+### 9.2 设计图说明
 
-| 文件 | 内容 | 状态 |
-|---|---|---|
-| feature-map.png | 功能全景图 | 待补（§1.2 有 ASCII 兜底） |
-| architecture.png | 系统架构图 | 待补（§2.1 有 ASCII 兜底） |
-| sequence.png | AI 识别时序图 | 待补（§2.2 有 ASCII 兜底） |
-| er.png | 数据库 ER 图 | 待补（§4.1 有分组示意） |
-| router.png | 前端路由结构图 | 待补（§6.2 有树形兜底） |
+本文档所有图表（功能全景、架构、时序、ER、路由）均以 **Mermaid 代码块**内嵌，GitHub 原生渲染，无需外部图片文件。
 
 ### 9.3 关联文档
 
 - 产品需求：[PRD.md](../PRD.md)
 - 项目说明：[README.md](../README.md)
-- 博客版（待发布后补链接）：——
+- 博客版：https://aishen-blog.netlify.app/
 
 ---
 
